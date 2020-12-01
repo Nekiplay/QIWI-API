@@ -14,8 +14,12 @@ double balusd = wallet.Balance.USD(phone);
 ```
 
 **Using Donate QIWI API**
+Create:
 ```C#
 QIWI.Donation donation = new QIWI.Donation("donate.qiwi.com token", OnDonate);
+```
+Get new donate
+```C#
 private void OnDonate(string nickname, double ammount, string currency, string message)
 {
 
