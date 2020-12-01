@@ -1,6 +1,6 @@
 # QIWI-API
 
-Using Wallet API
+###Using Wallet API
 
 Create:
 ```C#
@@ -11,4 +11,13 @@ Get Balance and get phone:
 string phone = wallet.Identification.Phone();
 double balrub = wallet.Balance.RUB(phone);
 double balusd = wallet.Balance.USD(phone);
+```
+
+###Using Donate QIWI API
+```C#
+QIWI.Donation donation = new QIWI.Donation("donate.qiwi.con token", OnDonate);
+private void OnDonate(string nickname, double ammount, string currency, string message)
+{
+
+}
 ```
