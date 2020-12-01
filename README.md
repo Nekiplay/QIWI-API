@@ -13,6 +13,7 @@ double balrub = wallet.Balance.RUB(phone);
 double balusd = wallet.Balance.USD(phone);
 ```
 
+
 ## Using Donate QIWI API
 **Create:**
 ```C#
