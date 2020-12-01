@@ -10,5 +10,5 @@ Get Balance and get phone:
 ```C#
 string phone = wallet.Identification.Phone();
 double balrub = wallet.Balance.RUB(phone);
-ouble balusd = wallet.Balance.USD(phone);
+double balusd = wallet.Balance.USD(phone);
 ```
