@@ -1,6 +1,6 @@
 # QIWI-API
 
-**Using Wallet API**
+##Using Wallet API
 
 Create:
 ```C#
@@ -13,12 +13,12 @@ double balrub = wallet.Balance.RUB(phone);
 double balusd = wallet.Balance.USD(phone);
 ```
 
-**Using Donate QIWI API**
+##Using Donate QIWI API
 Create:
 ```C#
 QIWI.Donation donation = new QIWI.Donation("donate.qiwi.com token", OnDonate);
 ```
-Get new donate
+Get new donate:
 ```C#
 private void OnDonate(string nickname, double ammount, string currency, string message)
 {
