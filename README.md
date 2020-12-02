@@ -13,8 +13,9 @@ double balrub = wallet.Balance.RUB(phone);
 double balusd = wallet.Balance.USD(phone);
 ```
 **Send money for other QIWI Wallet:**
+```C#
 bool done = wallet.Balance.Transfer.QIWIRUB("phone", 1.0, "comment");
-
+```
 
 ## Using Donate QIWI API
 **Create:**
