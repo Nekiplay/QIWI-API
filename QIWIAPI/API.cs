@@ -244,7 +244,7 @@ namespace QIWIAPI
                         wc.Encoding = Encoding.UTF8;
                         wc.Headers.Set(HttpRequestHeader.ContentType, "application/json;charset=utf-8");
                         wc.Headers.Set(HttpRequestHeader.ContentEncoding, "br");
-                        wc.Headers.Set(HttpRequestHeader.Cookie, "_ga=GA1.2.1131763766.1607589393; token-tail=" + (unixTimestamp * 1000) + "; auth_ukafokfuabbuzdckyiwlunsh=MDIzfF98X3xjUlArLmhuVmFdAXByZAYAPwdAeE9dQmMmXEJUeEExcS9wZUJbZVVqXlFeUEVnUENYUyxFQFR7UH9TEGBQRWxHYgUYcH4zbx91UFMlIHoKDjxUW3RVXUN+fwtAW3tIYg==");
+                        wc.Headers.Set(HttpRequestHeader.Cookie, "token-tail=" + (unixTimestamp * 1000) + "");
                         return UnicodeToUTF8(wc.UploadString("https://donate.qiwi.com/api/payment/v1/streamers/" + login + "/payments", "{\"amount\":{\"value\":\"" + ammounts + "\",\"currency\":\"" + currency + "\"},\"login\":\"" + login + "\",\"senderName\":\"" + senderName + "\",\"message\":\"" + message + "\"}"));
                     }
                 } catch { }
