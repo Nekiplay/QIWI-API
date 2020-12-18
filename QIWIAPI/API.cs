@@ -233,6 +233,23 @@ namespace QIWIAPI
                 this.onDonation = onDonation;
                 StartAsync();
             }
+            public string GetDonateLink(string login, string senderName, string message, double ammount, string currency = "RUB")
+            {
+                try
+                {
+                    string ammounts = (ammount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+                    Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                    using (WebClient wc = new WebClient())
+                    {
+                        wc.Encoding = Encoding.UTF8;
+                        wc.Headers.Set(HttpRequestHeader.ContentType, "application/json;charset=utf-8");
+                        wc.Headers.Set(HttpRequestHeader.ContentEncoding, "br");
+                        wc.Headers.Set(HttpRequestHeader.Cookie, "_ga=GA1.2.1131763766.1607589393; token-tail=" + (unixTimestamp * 1000) + "; auth_ukafokfuabbuzdckyiwlunsh=MDIzfF98X3xjUlArLmhuVmFdAXByZAYAPwdAeE9dQmMmXEJUeEExcS9wZUJbZVVqXlFeUEVnUENYUyxFQFR7UH9TEGBQRWxHYgUYcH4zbx91UFMlIHoKDjxUW3RVXUN+fwtAW3tIYg==");
+                        return UnicodeToUTF8(wc.UploadString("https://donate.qiwi.com/api/payment/v1/streamers/" + login + "/payments", "{\"amount\":{\"value\":\"" + ammounts + "\",\"currency\":\"" + currency + "\"},\"login\":\"" + login + "\",\"senderName\":\"" + senderName + "\",\"message\":\"" + message + "\"}"));
+                    }
+                } catch { }
+                return "";
+            }
             public Donation(string token, Action<string, double, string, string> onDonation)
             {
                 this.token = token;
