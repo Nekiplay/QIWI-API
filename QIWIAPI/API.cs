@@ -245,7 +245,9 @@ namespace QIWIAPI
                         wc.Headers.Set(HttpRequestHeader.ContentType, "application/json;charset=utf-8");
                         wc.Headers.Set(HttpRequestHeader.ContentEncoding, "br");
                         wc.Headers.Set(HttpRequestHeader.Cookie, "token-tail=" + (unixTimestamp * 1000) + "");
-                        return UnicodeToUTF8(wc.UploadString("https://donate.qiwi.com/api/payment/v1/streamers/" + login + "/payments", "{\"amount\":{\"value\":\"" + ammounts + "\",\"currency\":\"" + currency + "\"},\"login\":\"" + login + "\",\"senderName\":\"" + senderName + "\",\"message\":\"" + message + "\"}"));
+                        string link = UnicodeToUTF8(wc.UploadString("https://donate.qiwi.com/api/payment/v1/streamers/" + login + "/payments", "{\"amount\":{\"value\":\"" + ammounts + "\",\"currency\":\"" + currency + "\"},\"login\":\"" + login + "\",\"senderName\":\"" + senderName + "\",\"message\":\"" + message + "\"}"));
+                        string linkdone = Regex.Match(link, "{\"redirectUrl\":\"(.*)\"}").Groups[1].Value;
+                        return linkdone;
                     }
                 } catch { }
                 return "";
