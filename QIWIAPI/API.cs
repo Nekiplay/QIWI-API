@@ -15,11 +15,6 @@ namespace QIWIAPI
             public _Identification_ Identification;
 
             private string token;
-            public enum Currency
-            {
-                RUB = 643,
-                USD = 840,
-            };
             public Wallet(string token)
             {
                 this.token = token;
@@ -181,6 +176,17 @@ namespace QIWIAPI
                         return false;
                     }
                 }
+                public string History(string phone)
+                {
+                    using (WebClient wc = new WebClient())
+                    {
+                        wc.Encoding = Encoding.UTF8;
+                        wc.Headers.Set("authorization", "Bearer " + this.token);
+                        string response = wc.DownloadString("https://edge.qiwi.com/payment-history/v2/persons/" + phone  + "/payments?rows=10");
+                        Console.WriteLine(response);
+                        return "";
+                    }
+                }
 
                 public double RUB(string phone)
                 {
@@ -226,12 +232,64 @@ namespace QIWIAPI
         public class Donation
         {
             private string token;
-            private List<Action<string, double, string, string>> onDonation { get; set; }
-            public Donation(string token, List<Action<string, double, string, string>> onDonation)
+
+            private List<Action<DonateResponse>> onDonation { get; set; }
+            public Donation(string token, List<Action<DonateResponse>> onDonation)
             {
                 this.token = token;
                 this.onDonation = onDonation;
                 StartAsync();
+            }
+            public Donation(string token, Action<DonateResponse> onDonation)
+            {
+                this.token = token;
+                this.onDonation = new List<Action<DonateResponse>>();
+                this.onDonation.Add(onDonation);
+                StartAsync();
+            }
+            public class DonateResponse
+            {
+                public string Token;
+                public string MessageId;
+                public string Nickname;
+                public string Currency;
+                public double Ammount;
+                public string Message;
+            }
+            public DonateResponse GetLastMessage()
+            {
+                using (WebClient wc = new WebClient())
+                {
+                    wc.Encoding = Encoding.UTF8;
+                    string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/statistics/" + token + "/last-messages?&limit=1");
+                    //Console.WriteLine(response);
+                    // {"widgetGroupExtId":"faffc6f3-6da1-4582-bbde-5fb22d2515dd","limit":1,"messages":[{"messageExtId":"1bd87237-6618-4108-be0f-255e50d60f76","amount":{"value":5.00,"currency":"RUB"},"senderName":"dives_wg","message":"Ладно еще разок, прикольная акция кстати"}]}
+                    string donatetoken = Regex.Match(response, "{\"widgetGroupExtId\":\"(.*)\",\"limit\":1").Groups[1].Value;
+                    string messageId = Regex.Match(response, "\"messageExtId\":\"(.*)\",\"amount\"").Groups[1].Value;
+
+                    string ammountst = Regex.Match(response, "\"amount\":{\"value\":(.*),\"currency\":\"(.*)\"}").Groups[1].Value;
+                    double ammount = 0;
+                    if (ammountst != "")
+                    {
+                        ammountst = ammountst.Replace(".", ",").Replace(" ", "");
+                        ammount = double.Parse(ammountst);
+                    }
+
+                    string currency = Regex.Match(response, "\"amount\":{\"value\":(.*),\"currency\":\"(.*)\"},\"senderName\"").Groups[2].Value;
+
+                    string nickname = Regex.Match(response, "\"senderName\":\"(.*)\",\"message\"").Groups[1].Value;
+
+                    string message = Regex.Match(response, "\"message\":\"(.*)\"}]}").Groups[1].Value;
+
+                    DonateResponse donateResponse = new DonateResponse();
+                    donateResponse.Nickname = nickname;
+                    donateResponse.Token = donatetoken;
+                    donateResponse.MessageId = messageId;
+                    donateResponse.Ammount = ammount;
+                    donateResponse.Currency = currency;
+                    donateResponse.Message = message;
+                    return donateResponse;
+                }
             }
             public string GetDonateLink(string login, string senderName, string message, double ammount, string currency = "RUB")
             {
@@ -247,17 +305,18 @@ namespace QIWIAPI
                         wc.Headers.Set(HttpRequestHeader.Cookie, "token-tail=" + (unixTimestamp * 1000) + "");
                         string link = UnicodeToUTF8(wc.UploadString("https://donate.qiwi.com/api/payment/v1/streamers/" + login + "/payments", "{\"amount\":{\"value\":\"" + ammounts + "\",\"currency\":\"" + currency + "\"},\"login\":\"" + login + "\",\"senderName\":\"" + senderName + "\",\"message\":\"" + message + "\"}"));
                         string linkdone = Regex.Match(link, "{\"redirectUrl\":\"(.*)\"}").Groups[1].Value;
+                        Console.WriteLine(link);
                         return linkdone;
                     }
                 } catch { }
                 return "";
             }
-            public Donation(string token, Action<string, double, string, string> onDonation)
+            private string UnicodeToUTF8(string strFrom)
             {
-                this.token = token;
-                this.onDonation = new List<Action<string, double, string, string>>();
-                this.onDonation.Add(onDonation);
-                StartAsync();
+                byte[] bytes = Encoding.Default.GetBytes(strFrom);
+
+                return Encoding.UTF8.GetString(bytes);
+
             }
             private void StartAsync()
             {
@@ -271,7 +330,6 @@ namespace QIWIAPI
                         {
                             wc.Encoding = Encoding.UTF8;
                             string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/widgets/" + token + "/events?&limit=1");
-
                             string type = Regex.Match(response, "\"type\":\"(.*)\",\"status\":\"(.*)\"").Groups[1].Value;
                             if (type == "DONATION")
                             {
@@ -283,13 +341,18 @@ namespace QIWIAPI
                                     ammountst = ammountst.Replace(".", ",").Replace(" ", "");
                                     ammount = double.Parse(ammountst);
                                 }
+                                string MsgId = Regex.Match(response, "{\"eventExtId\":\"(.*)\",\"type\":\"(.*)\"").Groups[1].Value;
+                                string token = Regex.Match(response, "\"widgetGroupExtId\":\"(.*)\",\"limit\"").Groups[1].Value; 
                                 string currency = Regex.Match(response, "\"DONATION_CURRENCY\":\"(.*)\",\"DONATION_SENDER\"").Groups[1].Value;
                                 string message = Regex.Match(response, "\"DONATION_MESSAGE\":\"(.*)\",\"DONATION_CURRENCY\":\"(.*)\"").Groups[1].Value;
                                 if (nickname != "")
                                 {
-                                    foreach (Action<string, double, string, string> action in onDonation)
+                                    foreach (Action<DonateResponse> action in onDonation)
                                     {
-                                        action(nickname, ammount, currency, message);
+                                        DonateResponse donateresponse = new DonateResponse { Nickname = nickname, Currency = currency, Ammount = ammount, Message = message };
+                                        donateresponse.Token = token;
+                                        donateresponse.MessageId = MsgId;
+                                        action(donateresponse);
                                     }
                                 }
                             }
