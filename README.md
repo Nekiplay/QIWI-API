@@ -20,7 +20,7 @@ bool done = wallet.Balance.Transfer.QIWIRUB("phone", 1.0, "comment");
 ## Using Donate QIWI API
 **Create:**
 ```C#
-QIWI.Donation donation = new QIWI.Donation("donate.qiwi.com token", OnDonate);
+QIWI.Donation donation = new QIWI.Donation("donate.qiwi.com token", NewDonates);
 ```
 **Get link for donate:**
 ```C#
