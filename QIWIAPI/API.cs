@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QIWIAPI
@@ -455,28 +456,39 @@ namespace QIWIAPI
                 {
                     while (true)
                     {
-                        using (WebClient wc = new WebClient())
+                        try
                         {
-                            wc.Encoding = Encoding.UTF8;
-                            string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/widgets/" + this.token + "/events?&limit=1");
-                            Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);;
-                            if (myDeserializedClass.events.First().type == "DONATION")
+                            using (WebClient wc = new WebClient())
                             {
-                                string nickname = myDeserializedClass.events.First().attributes.DONATION_SENDER;
-                                double ammount = myDeserializedClass.events.First().attributes.DONATION_AMOUNT;
-                                string MsgId = myDeserializedClass.events.First().eventExtId;
-                                string currency = myDeserializedClass.events.First().attributes.DONATION_CURRENCY;
-                                string message = myDeserializedClass.events.First().attributes.DONATION_MESSAGE;
-                                if (nickname != "")
+                                wc.Encoding = Encoding.UTF8;
+                                string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/widgets/" + this.token + "/events?&limit=1");
+                                Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
+                                if (myDeserializedClass != null)
                                 {
-                                    foreach (Action<DonateResponse> action in onDonation)
+                                    if (myDeserializedClass.events.First().type == "DONATION")
                                     {
-                                        DonateResponse donateresponse = new DonateResponse { Nickname = nickname, Currency = currency, Ammount = ammount, Message = message };
-                                        donateresponse.MessageId = MsgId;
-                                        action(donateresponse);
+                                        string nickname = myDeserializedClass.events.First().attributes.DONATION_SENDER;
+                                        double ammount = myDeserializedClass.events.First().attributes.DONATION_AMOUNT;
+                                        string MsgId = myDeserializedClass.events.First().eventExtId;
+                                        string currency = myDeserializedClass.events.First().attributes.DONATION_CURRENCY;
+                                        string message = myDeserializedClass.events.First().attributes.DONATION_MESSAGE;
+                                        if (nickname != "")
+                                        {
+                                            foreach (Action<DonateResponse> action in onDonation)
+                                            {
+                                                DonateResponse donateresponse = new DonateResponse { Nickname = nickname, Currency = currency, Ammount = ammount, Message = message };
+                                                donateresponse.MessageId = MsgId;
+                                                action(donateresponse);
+                                            }
+                                        }
                                     }
                                 }
                             }
+                            //Thread.Sleep(500);
+                        } 
+                        catch 
+                        {
+                            //Console.WriteLine("[" + DateTime.Now + "]" + " Error");
                         }
                     }
                 });
