@@ -328,29 +328,7 @@ namespace QIWIAPI
                     }
                     return 0.0;
                 }
-                public double USD(string phone)
-                {
-                    using (WebClient wc = new WebClient())
-                    {
-                        wc.Headers.Set("authorization", "Bearer " + this.token);
-                        string response = wc.DownloadString("https://edge.qiwi.com/funding-sources/v2/persons/" + phone + "/accounts");
-                        //Console.WriteLine(response);
-                        string usds = Regex.Match(response, "{\"alias\":\"qw_wallet_usd\",\"fsAlias\":\"qb_wallet\",\"bankAlias\":\"QIWI\",\"title\":\"Qiwi Account\",\"type\":{\"id\":\"WALLET\",\"title\":\"Visa QIWI Wallet\"},\"hasBalance\":(.*),\"balance\":{\"amount\":(.*),\"currency\":840},\"currency\":840,\"defaultAccount\":(.*)}").Groups[2].Value;
-                        //Console.WriteLine("Доларров: " + usds);
-                        if (usds != "")
-                        {
-                            usds = usds.Replace(" ", "").Replace(".", ",");
-                            //Console.WriteLine("Доларров: " + usds);
-                            double usd = double.Parse(usds);
-                            return usd;
-                        }
-                        else
-                            return 0.0;
-                    }
-                    return 0.0;
-                }
             }
-
         }
         public class Donation
         {
