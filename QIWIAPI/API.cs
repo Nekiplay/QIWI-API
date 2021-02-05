@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -352,7 +354,6 @@ namespace QIWIAPI
             }
             public class DonateResponse
             {
-                public string Token;
                 public string MessageId;
                 public string Nickname;
                 public string Currency;
@@ -420,6 +421,33 @@ namespace QIWIAPI
                 return Encoding.UTF8.GetString(bytes);
 
             }
+
+            public class Attributes
+            {
+                public string DONATION_CURRENCY { get; set; }
+                public string DONATION_SENDER { get; set; }
+                public string DONATION_MESSAGE { get; set; }
+                public double DONATION_AMOUNT { get; set; }
+            }
+
+            public class Event
+            {
+                public string eventExtId { get; set; }
+                public string type { get; set; }
+                public string status { get; set; }
+                public DateTime donateDatetime { get; set; }
+                public Attributes attributes { get; set; }
+                public List<object> voteResults { get; set; }
+                public DateTime createDatetime { get; set; }
+            }
+
+            public class Root
+            {
+                public int limit { get; set; }
+                public string queuePriority { get; set; }
+                public List<Event> events { get; set; }
+            }
+
             private void StartAsync()
             {
                 ServicePointManager.Expect100Continue = true;
@@ -432,27 +460,19 @@ namespace QIWIAPI
                         {
                             wc.Encoding = Encoding.UTF8;
                             string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/widgets/" + this.token + "/events?&limit=1");
-                            string type = Regex.Match(response, "\"type\":\"(.*)\",\"status\":\"(.*)\"").Groups[1].Value;
-                            if (type == "DONATION")
+                            Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);;
+                            if (myDeserializedClass.events.First().type == "DONATION")
                             {
-                                string nickname = Regex.Match(response, "\"DONATION_SENDER\":\"(.*)\",\"DONATION_MESSAGE\"").Groups[1].Value;
-                                string ammountst = Regex.Match(response, "\"DONATION_AMOUNT\":(.*)},\"voteResults\"").Groups[1].Value;
-                                double ammount = 0;
-                                if (ammountst != "")
-                                {
-                                    ammountst = ammountst.Replace(".", ",").Replace(" ", "");
-                                    ammount = double.Parse(ammountst);
-                                }
-                                string MsgId = Regex.Match(response, "{\"eventExtId\":\"(.*)\",\"type\":\"(.*)\"").Groups[1].Value;
-                                string token = Regex.Match(response, "\"widgetGroupExtId\":\"(.*)\",\"limit\"").Groups[1].Value; 
-                                string currency = Regex.Match(response, "\"DONATION_CURRENCY\":\"(.*)\",\"DONATION_SENDER\"").Groups[1].Value;
-                                string message = Regex.Match(response, "\"DONATION_MESSAGE\":\"(.*)\",\"DONATION_AMOUNT\":(.*)}").Groups[1].Value;
+                                string nickname = myDeserializedClass.events.First().attributes.DONATION_SENDER;
+                                double ammount = myDeserializedClass.events.First().attributes.DONATION_AMOUNT;
+                                string MsgId = myDeserializedClass.events.First().eventExtId;
+                                string currency = myDeserializedClass.events.First().attributes.DONATION_CURRENCY;
+                                string message = myDeserializedClass.events.First().attributes.DONATION_MESSAGE;
                                 if (nickname != "")
                                 {
                                     foreach (Action<DonateResponse> action in onDonation)
                                     {
                                         DonateResponse donateresponse = new DonateResponse { Nickname = nickname, Currency = currency, Ammount = ammount, Message = message };
-                                        donateresponse.Token = token;
                                         donateresponse.MessageId = MsgId;
                                         action(donateresponse);
                                     }

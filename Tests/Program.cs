@@ -13,12 +13,11 @@ namespace Tests
         static QIWIAPI.QIWI.Donation donation = null;
         static void Main(string[] args)
         {
-            donation = new QIWIAPI.QIWI.Donation("token", NewDonates, true);
+            donation = new QIWIAPI.QIWI.Donation("", NewDonates, true);
             Console.ReadKey(true);
         }
         static void NewDonates(QIWI.Donation.DonateResponse response)
         {
-           Console.WriteLine("Token: " + response.Token);
            Console.WriteLine("ID: " + response.MessageId);
            Console.WriteLine("Nickname: " + response.Nickname);
            Console.WriteLine("Ammount: " + response.Ammount);
