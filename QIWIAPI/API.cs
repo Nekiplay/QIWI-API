@@ -387,7 +387,6 @@ namespace QIWIAPI
 
                     DonateResponse donateResponse = new DonateResponse();
                     donateResponse.Nickname = nickname;
-                    donateResponse.Token = donatetoken;
                     donateResponse.MessageId = messageId;
                     donateResponse.Ammount = ammount;
                     donateResponse.Currency = currency;
