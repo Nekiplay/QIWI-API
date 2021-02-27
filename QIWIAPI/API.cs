@@ -20,7 +20,7 @@ namespace QIWIAPI
             public _Balance_ Balance;
             public _Identification_ Identification;
 
-            private string token;
+            private readonly string token;
             public Wallet(string token)
             {
                 this.token = token;
@@ -283,17 +283,6 @@ namespace QIWIAPI
                         }
                     }
                 }
-                public string History(string phone)
-                {
-                    using (WebClient wc = new WebClient())
-                    {
-                        wc.Encoding = Encoding.UTF8;
-                        wc.Headers.Set("authorization", "Bearer " + this.token);
-                        string response = wc.DownloadString("https://edge.qiwi.com/payment-history/v2/persons/" + phone  + "/payments?rows=10");
-                        return "";
-                    }
-                }
-
                 public double RUB(string phone)
                 {
                     using (WebClient wc = new WebClient())
@@ -336,7 +325,7 @@ namespace QIWIAPI
         }
         public class Donation
         {
-            private string token;
+            private readonly string token;
 
             private List<Action<DonateResponse>> onDonation { get; set; }
             public Donation(string token, List<Action<DonateResponse>> onDonation, bool updater = true)
