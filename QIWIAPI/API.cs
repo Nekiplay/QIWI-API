@@ -173,11 +173,9 @@ namespace QIWIAPI
                                     return true;
                                 }
                             }
-                            response.Close();
                         } 
                         catch (WebException ex)
                         {
-                            Console.WriteLine(ex.Message);
                             return false;
                         }
                         return false;
@@ -217,7 +215,6 @@ namespace QIWIAPI
                                 using (StreamReader reader = new StreamReader(stream))
                                 {
                                     string read = reader.ReadToEnd();
-                                    Console.WriteLine(read);
                                     return true;
                                 }
                             }
@@ -225,7 +222,6 @@ namespace QIWIAPI
                         }
                         catch (WebException ex)
                         {
-                            Console.WriteLine(ex.Message);
                             return false;
                         }
                         return false;
@@ -281,7 +277,7 @@ namespace QIWIAPI
                             }
                             response.Close();
                         }
-                        catch ()
+                        catch
                         {
                             return false;
                         }
@@ -323,13 +319,10 @@ namespace QIWIAPI
                     {
                         wc.Headers.Set("authorization", "Bearer " + this.token);
                         string response = wc.DownloadString("https://edge.qiwi.com/funding-sources/v2/persons/" + phone + "/accounts");
-                        //Console.WriteLine(response);
                         string usds = Regex.Match(response, "{\"alias\":\"qw_wallet_usd\",\"fsAlias\":\"qb_wallet\",\"bankAlias\":\"QIWI\",\"title\":\"Qiwi Account\",\"type\":{\"id\":\"WALLET\",\"title\":\"Visa QIWI Wallet\"},\"hasBalance\":(.*),\"balance\":{\"amount\":(.*),\"currency\":840},\"currency\":840,\"defaultAccount\":(.*)}").Groups[2].Value;
-                        //Console.WriteLine("Доларров: " + usds);
                         if (usds != "")
                         {
                             usds = usds.Replace(" ", "").Replace(".", ",");
-                            //Console.WriteLine("Доларров: " + usds);
                             double usd = double.Parse(usds);
                             return usd;
                         }
@@ -351,7 +344,9 @@ namespace QIWIAPI
                 this.token = token;
                 this.onDonation = onDonation;
                 if (updater)
+                {
                     StartAsync();
+                }
             }
             public Donation(string token, Action<DonateResponse> onDonation, bool updater = true)
             {
@@ -359,7 +354,9 @@ namespace QIWIAPI
                 this.onDonation = new List<Action<DonateResponse>>();
                 this.onDonation.Add(onDonation);
                 if (updater)
+                {
                     StartAsync();
+                }
             }
             public class DonateResponse
             {
@@ -375,8 +372,6 @@ namespace QIWIAPI
                 {
                     wc.Encoding = Encoding.UTF8;
                     string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/statistics/" + token + "/last-messages?&limit=1");
-                    //Console.WriteLine(response);
-                    // {"widgetGroupExtId":"faffc6f3-6da1-4582-bbde-5fb22d2515dd","limit":1,"messages":[{"messageExtId":"1bd87237-6618-4108-be0f-255e50d60f76","amount":{"value":5.00,"currency":"RUB"},"senderName":"dives_wg","message":"Ладно еще разок, прикольная акция кстати"}]}
                     string donatetoken = Regex.Match(response, "{\"widgetGroupExtId\":\"(.*)\",\"limit\":1").Groups[1].Value;
                     string messageId = Regex.Match(response, "\"messageExtId\":\"(.*)\",\"amount\"").Groups[1].Value;
 
@@ -493,11 +488,10 @@ namespace QIWIAPI
                                     }
                                 }
                             }
-                            //Thread.Sleep(500);
                         } 
-                        catch 
+                        catch
                         {
-                            //Console.WriteLine("[" + DateTime.Now + "]" + " Error");
+
                         }
                     }
                 });
