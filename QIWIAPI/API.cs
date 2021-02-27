@@ -170,7 +170,6 @@ namespace QIWIAPI
                                 using (StreamReader reader = new StreamReader(stream))
                                 {
                                     string read = reader.ReadToEnd();
-                                    Console.WriteLine(read);
                                     return true;
                                 }
                             }
@@ -243,13 +242,21 @@ namespace QIWIAPI
                         {
                             string id = "1963";
                             if (card == CardType.MasterCard)
+                            {
                                 id = "21013";
+                            }
                             else if (card == CardType.Visa)
+                            {
                                 id = "1963";
+                            }
                             else if (card == CardType.MIR)
+                            {
                                 id = "31652";
+                            }
                             else if (card == CardType.QIWI_Virtual)
+                            {
                                 id = "22351";
+                            }
                             WebRequest request = WebRequest.Create("https://edge.qiwi.com/sinap/api/v2/terms/" + id + "/payments");
                             request.Method = "POST";
                             byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(jsonv2);
@@ -288,7 +295,6 @@ namespace QIWIAPI
                         wc.Encoding = Encoding.UTF8;
                         wc.Headers.Set("authorization", "Bearer " + this.token);
                         string response = wc.DownloadString("https://edge.qiwi.com/payment-history/v2/persons/" + phone  + "/payments?rows=10");
-                        Console.WriteLine(response);
                         return "";
                     }
                 }
@@ -443,6 +449,7 @@ namespace QIWIAPI
 
             public class Root
             {
+                public string widgetGroupExtId { get; set; } 
                 public int limit { get; set; }
                 public string queuePriority { get; set; }
                 public List<Event> events { get; set; }

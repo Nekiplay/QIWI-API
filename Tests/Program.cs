@@ -18,6 +18,7 @@ namespace Tests
         }
         static void NewDonates(QIWI.Donation.DonateResponse response)
         {
+           Console.WriteLine("Token: " + response.Token);
            Console.WriteLine("ID: " + response.MessageId);
            Console.WriteLine("Nickname: " + response.Nickname);
            Console.WriteLine("Ammount: " + response.Ammount);
