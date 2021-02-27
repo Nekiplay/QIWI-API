@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tests
 {
-    class Program
+    static class Program
     {
         static QIWIAPI.QIWI.Donation donation = null;
         static void Main(string[] args)
