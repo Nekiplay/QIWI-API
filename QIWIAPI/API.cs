@@ -281,11 +281,10 @@ namespace QIWIAPI
                             }
                             response.Close();
                         }
-                        catch (WebException ex)
+                        catch ()
                         {
                             return false;
                         }
-                        return false;
                     }
                 }
                 public string History(string phone)
@@ -313,7 +312,9 @@ namespace QIWIAPI
                             return rub;
                         }
                         else
+                        {
                             return 0.0;
+                        }
                     }
                 }
                 public double USD(string phone)
@@ -333,9 +334,10 @@ namespace QIWIAPI
                             return usd;
                         }
                         else
+                        {
                             return 0.0;
+                        }
                     }
-                    return 0.0;
                 }
             }
         }
