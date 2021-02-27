@@ -1,5 +1,7 @@
 # QIWI-API
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/ed4b8c515ade49bd8fa5e4932f1eee40)](https://www.codacy.com/gh/Nekiplay/QIWI-API/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Nekiplay/QIWI-API&amp;utm_campaign=Badge_Grade)
+
 ## Using Wallet API
 
 **Create:**
