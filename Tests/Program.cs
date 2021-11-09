@@ -14,6 +14,7 @@ namespace Tests
         static void Main(string[] args)
         {
             donation = new QIWIAPI.QIWI.Donation("", NewDonates, true);
+            string link = donation.GetDonateLink("Neki_play1", "Neki", "Test", 25);
             Console.ReadKey(true);
         }
         static void NewDonates(QIWI.Donation.DonateResponse response)

@@ -395,6 +395,7 @@ namespace QIWIAPI
                     Int32 unixTimestamp = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
                     using (WebClient wc = new WebClient())
                     {
+
                         wc.Encoding = Encoding.UTF8;
                         wc.Headers.Set(HttpRequestHeader.ContentType, "application/json;charset=utf-8");
                         wc.Headers.Set(HttpRequestHeader.ContentEncoding, "br");
