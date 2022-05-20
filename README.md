@@ -30,13 +30,12 @@ string link = donation.GetDonateLink("nickname", "senderName", "Message", ammoun
 ```
 **Get new donate:**
 ```C#
-private void NewDonates(QIWI.Donation.DonateResponse response)
+private void NewDonates(QIWI.Donation.Event response)
 {
-    Console.WriteLine("Token: " + response.Token);
-    Console.WriteLine("ID: " + response.MessageId);
-    Console.WriteLine("Nickname: " + response.Nickname);
-    Console.WriteLine("Ammount: " + response.Ammount);
-    Console.WriteLine("Currency: " + response.Currency);
-    Console.WriteLine("Message: " + response.Message);
+    Console.WriteLine("ID: " + response.eventExtId);
+    Console.WriteLine("Nickname: " + response.attributes.DONATION_SENDER);
+    Console.WriteLine("Ammount: " + response.attributes.DONATION_AMOUNT);
+    Console.WriteLine("Currency: " + response.attributes.DONATION_CURRENCY);
+    Console.WriteLine("Message: " + response.attributes.DONATION_MESSAGE);
 }
 ```
