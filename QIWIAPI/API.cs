@@ -327,8 +327,8 @@ namespace QIWIAPI
         {
             private readonly string token;
 
-            private List<Action<DonateResponse>> onDonation { get; set; }
-            public Donation(string token, List<Action<DonateResponse>> onDonation, bool updater = true)
+            private List<Action<Event>> onDonation { get; set; }
+            public Donation(string token, List<Action<Event>> onDonation, bool updater = true)
             {
                 this.token = token;
                 this.onDonation = onDonation;
@@ -337,23 +337,35 @@ namespace QIWIAPI
                     StartAsync();
                 }
             }
-            public Donation(string token, Action<DonateResponse> onDonation, bool updater = true)
+            public Donation(string token, Action<Event> onDonation, bool updater = true)
             {
                 this.token = token;
-                this.onDonation = new List<Action<DonateResponse>>();
+                this.onDonation = new List<Action<Event>>();
                 this.onDonation.Add(onDonation);
                 if (updater)
                 {
                     StartAsync();
                 }
             }
+            public class Amount
+            {
+                public double value { get; set; }
+                public string currency { get; set; }
+            }
+
+            public class Message
+            {
+                public string messageExtId { get; set; }
+                public Amount amount { get; set; }
+                public string senderName { get; set; }
+                public string message { get; set; }
+            }
+
             public class DonateResponse
             {
-                public string MessageId;
-                public string Nickname;
-                public string Currency;
-                public double Ammount;
-                public string Message;
+                public string widgetGroupExtId { get; set; }
+                public int limit { get; set; }
+                public List<Message> messages { get; set; }
             }
             public DonateResponse GetLastMessage()
             {
@@ -361,30 +373,8 @@ namespace QIWIAPI
                 {
                     wc.Encoding = Encoding.UTF8;
                     string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/statistics/" + token + "/last-messages?&limit=1");
-                    string donatetoken = Regex.Match(response, "{\"widgetGroupExtId\":\"(.*)\",\"limit\":1").Groups[1].Value;
-                    string messageId = Regex.Match(response, "\"messageExtId\":\"(.*)\",\"amount\"").Groups[1].Value;
-
-                    string ammountst = Regex.Match(response, "\"amount\":{\"value\":(.*),\"currency\":\"(.*)\"}").Groups[1].Value;
-                    double ammount = 0;
-                    if (ammountst != "")
-                    {
-                        ammountst = ammountst.Replace(".", ",").Replace(" ", "");
-                        ammount = double.Parse(ammountst);
-                    }
-
-                    string currency = Regex.Match(response, "\"amount\":{\"value\":(.*),\"currency\":\"(.*)\"},\"senderName\"").Groups[2].Value;
-
-                    string nickname = Regex.Match(response, "\"senderName\":\"(.*)\",\"message\"").Groups[1].Value;
-
-                    string message = Regex.Match(response, "\"message\":\"(.*)\"}]}").Groups[1].Value;
-
-                    DonateResponse donateResponse = new DonateResponse();
-                    donateResponse.Nickname = nickname;
-                    donateResponse.MessageId = messageId;
-                    donateResponse.Ammount = ammount;
-                    donateResponse.Currency = currency;
-                    donateResponse.Message = message;
-                    return donateResponse;
+                    DonateResponse myDeserializedClass = JsonConvert.DeserializeObject<DonateResponse>(response);
+                    return myDeserializedClass;
                 }
             }
             public string GetDonateLink(string login, string senderName, string message, double ammount, string currency = "RUB")
@@ -417,10 +407,10 @@ namespace QIWIAPI
 
             public class Attributes
             {
-                public string DONATION_CURRENCY { get; set; }
                 public string DONATION_SENDER { get; set; }
-                public string DONATION_MESSAGE { get; set; }
                 public double DONATION_AMOUNT { get; set; }
+                public string DONATION_CURRENCY { get; set; }
+                public string DONATION_MESSAGE { get; set; }
             }
 
             public class Event
@@ -434,9 +424,9 @@ namespace QIWIAPI
                 public DateTime createDatetime { get; set; }
             }
 
-            public class Root
+            public class Donate
             {
-                public string widgetGroupExtId { get; set; } 
+                public string widgetGroupExtId { get; set; }
                 public int limit { get; set; }
                 public string queuePriority { get; set; }
                 public List<Event> events { get; set; }
@@ -456,23 +446,17 @@ namespace QIWIAPI
                             {
                                 wc.Encoding = Encoding.UTF8;
                                 string response = wc.DownloadString("https://donate.qiwi.com/api/stream/v1/widgets/" + this.token + "/events?&limit=1");
-                                Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(response);
+                                //Console.WriteLine(response);
+                                Donate myDeserializedClass = JsonConvert.DeserializeObject<Donate>(response);
                                 if (myDeserializedClass != null)
                                 {
-                                    if (myDeserializedClass.events.First().type == "DONATION")
+                                    foreach (Event e in myDeserializedClass.events)
                                     {
-                                        string nickname = myDeserializedClass.events.First().attributes.DONATION_SENDER;
-                                        double ammount = myDeserializedClass.events.First().attributes.DONATION_AMOUNT;
-                                        string MsgId = myDeserializedClass.events.First().eventExtId;
-                                        string currency = myDeserializedClass.events.First().attributes.DONATION_CURRENCY;
-                                        string message = myDeserializedClass.events.First().attributes.DONATION_MESSAGE;
-                                        if (nickname != "")
+                                        if (e.type.Equals("DONATION"))
                                         {
-                                            foreach (Action<DonateResponse> action in onDonation)
+                                            foreach (Action<Event> action in onDonation)
                                             {
-                                                DonateResponse donateresponse = new DonateResponse { Nickname = nickname, Currency = currency, Ammount = ammount, Message = message };
-                                                donateresponse.MessageId = MsgId;
-                                                action(donateresponse);
+                                                action(e);
                                             }
                                         }
                                     }
